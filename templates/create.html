@@ -1,0 +1,77 @@
+{% extends 'base.html' %} 
+
+{% block title %}게시판 - 글쓰기{% endblock %} 
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="border-b border-slate-700 pb-6 mb-10">
+    <h2 class="text-3xl font-extrabold text-white tracking-tight flex items-center">
+      <i class="fas fa-edit mr-4 text-indigo-500 text-2xl"></i>게시글 작성
+    </h2>
+    <p class="text-slate-500 text-xs mt-2 sys-font uppercase tracking-[0.2em]">New Data Entry Protocol</p>
+  </div>
+
+  <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+    <form action="{{ url_for('create_post') }}" method="post" class="space-y-8">
+      
+      <div class="group">
+        <label for="title" class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 sys-font group-focus-within:text-indigo-400 transition-colors">
+          [ 01 ] 제목
+        </label>
+        <input
+          type="text"
+          name="title"
+          id="title"
+          placeholder="시스템 로그 제목을 입력하십시오..."
+          required
+          class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-5 py-4 text-black placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+        />
+      </div>
+
+      <div class="group">
+        <label for="author" class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 sys-font group-focus-within:text-indigo-400 transition-colors">
+          [ 02 ] 작성자
+        </label>
+        <input
+          type="text"
+          name="author"
+          id="author"
+          placeholder="사용자 이름을 작성하시오..."
+          required
+          class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-5 py-4 text-black placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+        />
+      </div>
+
+      <div class="group">
+        <label for="content" class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 sys-font group-focus-within:text-indigo-400 transition-colors">
+          [ 03 ] 내용
+        </label>
+        <textarea
+          name="content"
+          id="content"
+          rows="10"
+          placeholder="상세 데이터를 입력하십시오..."
+          required
+          class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-5 py-4 text-black placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all resize-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-between items-center pt-6 border-t border-slate-700/50">
+        <a
+          href="{{ url_for('index') }}"
+          class="text-slate-500 hover:text-white px-6 py-3 rounded-xl transition-all flex items-center text-sm font-medium border border-transparent hover:border-slate-700"
+        >
+          <i class="fas fa-arrow-left mr-2 text-xs"></i>취소
+        </a>
+        
+        <button
+          type="submit"
+          class="bg-transparent text-indigo-400 px-10 py-3 rounded-xl hover:text-indigo-600 active:scale-95 transition-all flex items-center font-bold shadow-lg shadow-indigo-900/40"
+        >
+          <i class="fas fa-upload mr-2 text-xs"></i>등록
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

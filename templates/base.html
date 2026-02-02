@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}게시판{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+      @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+      /* 변수 설정 */
+      :root {
+        --bg-main: #0f172a;    
+        --bg-card: #1e293b;   
+        --text-main: #f1f5f9;  
+        --text-muted: #94a3b8; 
+        --accent: #6366f1;    
+      }
+
+      body { 
+        font-family: 'Inter', 'Pretendard', sans-serif; 
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        letter-spacing: -0.02em; 
+        line-height: 1.6;
+      }
+
+      .glass-header {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .sys-font { font-family: 'JetBrains Mono', monospace; }
+      
+      .hover-underline { position: relative; }
+      .hover-underline::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -4px;
+        left: 0;
+        background-color: var(--accent);
+        transition: width 0.3s ease;
+      }
+      .hover-underline:hover::after { width: 100%; }
+
+      .fade-in {
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes blink-extreme {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 0.4;
+          filter: drop-shadow(0 0 2px currentColor);
+        }
+        50% {
+          transform: scale(1.8); /* 크기가 확 커짐 */
+          opacity: 0.8;         /* 더 많이 투명해짐 */
+          filter: drop-shadow(0 0 12px currentColor); /* 빛이 확 번짐 */
+        }
+      }
+
+      .animate-blink {
+        animation: blink-extreme 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: var(--bg-main); }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    
+    <header class="glass-header sticky top-0 z-50">
+      <div class="container mx-auto px-6 py-5 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-tighter">
+          <a href="{{ url_for('index') }}" class="hover:text-indigo-400 transition-colors flex items-center">
+            <i class="fas fa-terminal mr-3 text-indigo-500 text-sm"></i>게시판
+          </a>
+        </h1>
+        <nav>
+          <ul class="flex space-x-10 text-sm font-medium tracking-tight">
+            <li>
+              <a href="{{ url_for('index') }}" class="hover-underline transition-all">홈</a>
+            </li>
+            <li>
+              <a href="{{ url_for('fms_list') }}" class="hover-underline transition-all text-indigo-400">FMS 결과</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-6 py-12 max-w-6xl">
+      {% with messages = get_flashed_messages() %} 
+      {% if messages %}
+      <div class="mb-10 space-y-3">
+        {% for message in messages %}
+        <div class="bg-slate-800 border border-slate-700 text-slate-200 px-5 py-4 text-sm font-medium flex justify-between items-center rounded-xl shadow-2xl fade-in">
+          <div class="flex items-center">
+            <i class="fas fa-info-circle mr-3 text-indigo-500"></i>
+            <span>{{ message }}</span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-white transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} 
+      {% endwith %} 
+
+      <div class="fade-in">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-900 text-slate-500 py-12 mt-20">
+      <div class="container mx-auto px-6 text-center text-xs tracking-widest uppercase">
+        <p class="mb-2">© 2026 Flask & PostgreSQL 게시판 by 이찬혜.</p>
+        <div class="flex justify-center space-x-4 opacity-50">
+          <span>Python</span>
+          <span>•</span>
+          <span>PostgreSQL</span>
+          <span>•</span>
+          <span>Tailwind CSS</span>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %} 
+
+{% block title %}게시판 - 목록{% endblock %} 
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700 pb-6">
+    <div>
+      <h2 class="text-3xl font-extrabold text-white tracking-tight">게시글 목록</h2>
+      <p class="text-slate-400 text-xs mt-1 sys-font uppercase tracking-widest opacity-60">Total Logs: {{ posts|length if posts else 0 }} entries detected</p>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <select class="bg-transparent border border-slate-700 text-slate-300 text-xs rounded-lg px-3 py-2 outline-none focus:border-indigo-500 transition-all sys-font">
+        <option value="10" class="text-black">10개씩 보기</option>
+        <option value="20" class="text-black">20개씩 보기</option>
+        <option value="30" class="text-black">30개씩 보기</option>
+      </select>
+
+      <a
+        href="{{ url_for('create_form') }}"
+        class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-500 transition-all flex items-center text-sm font-semibold shadow-lg shadow-indigo-900/20"
+      >
+        <i class="fas fa-pen-nib mr-2 text-xs"></i>새 글 작성
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+    <div class="overflow-x-auto">
+      <table class="min-w-full w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-800/80 text-slate-400 uppercase text-[11px] font-bold tracking-widest">
+            <th class="py-4 px-6 border-b border-slate-700">번호</th>
+            <th class="py-4 px-6 border-b border-slate-700">제목</th>
+            <th class="py-4 px-6 border-b border-slate-700">작성자</th>
+            <th class="py-4 px-6 border-b border-slate-700">작성일</th>
+            <th class="py-4 px-6 border-b border-slate-700 text-center">조회수</th>
+            <th class="py-4 px-6 border-b border-slate-700 text-center">좋아요</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-300 divide-y divide-slate-700/50">
+          {% for post in posts %}
+          <tr class="hover:bg-slate-700/30 transition-colors group">
+            <td class="py-4 px-6 sys-font text-slate-500 text-xs">
+              {{ total_posts - ((page - 1) * per_page) - (loop.index0) }}
+            </td>
+            <td class="py-4 px-6">
+              <a
+                href="{{ url_for('view_post', post_id=post.id) }}"
+                class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors underline-offset-4 hover:underline"
+              >
+                {{ post['title'] }}
+              </a>
+            </td>
+            <td class="py-4 px-6 text-sm">{{ post['author'] }}</td>
+            <td class="py-4 px-6 text-xs text-slate-500 sys-font">
+              {{ post['created_at'].strftime('%Y-%m-%d %H:%M') }}
+            </td>
+            <td class="py-4 px-6 text-center sys-font text-xs">{{ post['view_count'] }}</td>
+            <td class="py-4 px-6 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/20 text-red-400 border border-red-500/20">
+                <i class="fas fa-heart mr-1.5 text-[10px]"></i>{{ post['like_count'] }}
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-20 text-center text-slate-500 italic tracking-wide">
+              <i class="fas fa-inbox block text-3xl mb-4 opacity-20"></i>
+              등록된 게시글이 없습니다.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex justify-center mt-10">
+    <nav class="flex items-center space-x-1 sys-font">
+      <a href="#" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 transition-all">&laquo;</a>
+      <a href="#" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-900/40">1</a>
+      <a href="#" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-all">2</a>
+      <a href="#" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-all">3</a>
+      <a href="#" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-all">&raquo;</a>
+    </nav>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'base.html' %} 
+
+{% block title %} {{ post['title'] }} {% endblock %} 
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+  <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+    <div class="border-b border-slate-700/50 pb-6 mb-8">
+      <h2 class="text-3xl font-black tracking-tight text-white mb-6 leading-tight">{{ post['title'] }}</h2>
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs sys-font uppercase tracking-widest">
+        <div class="flex items-center space-x-5">
+          <div class="flex items-center text-slate-300">
+            <span class="text-indigo-500 mr-2 opacity-50">BY:</span>
+            <span class="font-bold">{{ post['author'] }}</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <div class="flex items-center text-slate-500">
+            <i class="far fa-calendar-alt mr-2 text-indigo-500/50"></i>
+            {{ post['created_at'].strftime('%Y-%m-%d %H:%M') }}
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-5 text-slate-500">
+          <span class="flex items-center"><i class="far fa-eye mr-2 text-indigo-500/50"></i>{{ post['view_count'] }}</span>
+          <span class="flex items-center text-rose-400 font-bold bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+            <i class="fas fa-heart mr-2"></i>{{ post['like_count'] }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="my-10 text-slate-300 leading-relaxed text-lg min-h-[200px]">
+      {{ post['content']|safe }}
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-700/50 gap-6">
+      <div>
+        <a
+          href="{{ url_for('index') }}"
+          class="text-slate-400 hover:text-white px-5 py-2.5 rounded-xl transition-all flex items-center text-sm font-medium border border-slate-700 hover:bg-slate-800"
+        >
+          <i class="fas fa-list-ul mr-2 text-xs"></i>목록으로 (Back)
+        </a>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <form action="{{ url_for('like_post', post_id=post.id) }}" method="post" class="inline">
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl transition-all flex items-center text-sm font-bold border {% if liked %} bg-rose-500/20 border-rose-500 text-rose-400 {% else %} border-rose-500/40 text-rose-500 hover:bg-rose-500 hover:text-white {% endif %}"
+          >
+            <i class="{% if liked %}fas{% else %}far{% endif %} fa-heart mr-2 text-xs"></i>
+            {{ '좋아요 취소' if liked else '좋아요' }}
+          </button>
+        </form>
+
+        <a
+          href="{{ url_for('edit_form', post_id=post.id) }}"
+          class="bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 px-5 py-2.5 rounded-xl hover:bg-indigo-600 hover:text-white transition-all text-sm font-bold"
+        >
+          <i class="fas fa-edit mr-2 text-xs"></i>수정
+        </a>
+
+        <form
+          action="{{ url_for('delete_post', post_id=post.id) }}"
+          method="post"
+          class="inline"
+          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+        >
+          <button
+            type="submit"
+            class="bg-slate-950 text-slate-400 border border-slate-800 px-5 py-2.5 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-bold"
+          >
+            <i class="fas fa-trash-alt mr-2 text-xs"></i>삭제
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+    <h3 class="text-xl font-bold text-white mb-8 flex items-center">
+      <i class="far fa-comments mr-3 text-indigo-500"></i>
+      댓글 <span class="ml-2 text-xs text-slate-500 sys-font">[{{ comments|length }}]</span>
+    </h3>
+
+    <div class="space-y-0 mb-12">
+      {% for comment in comments %}
+      <div class="py-6 border-b border-slate-700/50 last:border-0 group">
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-bold text-indigo-400 sys-font text-sm">> {{ comment['author'] }}</span>
+          <span class="text-slate-600 text-[10px] sys-font uppercase tracking-tighter"
+            >{{ comment['created_at'].strftime('%Y-%m-%d %H:%M') }}</span
+          >
+        </div>
+        <p class="text-slate-300 leading-relaxed text-sm pl-4 border-l-2 border-slate-700 group-hover:border-indigo-500 transition-all">
+          {{ comment['content'] }}
+        </p>
+      </div>
+      {% else %}
+      <div class="py-12 text-center text-slate-600 italic text-sm tracking-wide">
+        데이터가 없습니다. 첫 번째 로그를 남겨보세요.
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50">
+      <h4 class="text-[10px] font-bold text-slate-500 mb-5 uppercase tracking-[0.2em] sys-font">Add New Comment</h4>
+      <form
+        action="{{ url_for('add_comment', post_id=post.id) }}"
+        method="post"
+        class="space-y-4"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="md:col-span-1">
+            <input
+              type="text"
+              name="author"
+              id="author"
+              placeholder="작성자"
+              required
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-black placeholder-slate-600 outline-none focus:border-indigo-500 transition-all text-sm"
+            />
+          </div>
+          <div class="md:col-span-3">
+            <textarea
+              name="content"
+              id="content"
+              rows="1"
+              placeholder="내용을 입력하세요..."
+              required
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-black placeholder-slate-600 outline-none focus:border-indigo-500 transition-all text-sm resize-none"
+            ></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-500 transition-all font-bold text-sm shadow-lg shadow-indigo-900/40"
+          >
+            댓글 등록
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

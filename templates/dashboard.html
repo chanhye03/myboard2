@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="space-y-8">
+    <div class="border-b border-slate-700 pb-6">
+        <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase">FMS 데이터 인사이트 대시보드</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+            <h4 class="text-white font-bold mb-4 text-sm"><i class="fas fa-microscope mr-2 text-indigo-400"></i>01. 품종별 성장 가성비 분석 (사료 대비 중량)</h4>
+            <div class="h-64"><canvas id="scatterChart"></canvas></div>
+        </div>
+
+        <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+            <h4 class="text-white font-bold mb-4 text-sm"><i class="fas fa-truck mr-2 text-emerald-400"></i>02. 지역별 품종 선호도 및 공급 비중</h4>
+            <div class="h-64"><canvas id="regionChart"></canvas></div>
+        </div>
+
+        <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+            <h4 class="text-white font-bold mb-4 text-sm"><i class="fas fa-exclamation-triangle mr-2 text-rose-400"></i>03. 온도/습도 위험 구간별 불합격(Fail) 분포</h4>
+            <div class="h-64"><canvas id="envFailChart"></canvas></div>
+        </div>
+
+        <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+            <h4 class="text-white font-bold mb-4 text-sm"><i class="fas fa-home mr-2 text-amber-400"></i>04. 농장(Farm)별 품질 관리 지표 (합격률)</h4>
+            <div class="h-64"><canvas id="farmChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 공통 차트 스타일 설정
+    const colors = ['#6366f1', '#10b981', '#f59e0b', '#06b6d4', '#ec4899', '#8b5cf6'];
+    const commonAxes = { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } };
+
+    // 01. 품종별 산점도 (Scatter)
+    new Chart(document.getElementById('scatterChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {% for breed, points in breed_groups.items() %}
+                {
+                    label: '{{ breed }}',
+                    data: {{ points|tojson }},
+                    backgroundColor: colors[{{ loop.index0 % 6 }}]
+                },
+                {% endfor %}
+            ]
+        },
+        options: { maintainAspectRatio: false, scales: { x: { ...commonAxes, title: {display:true, text:'사료 섭취량(g)'} }, y: { ...commonAxes, title: {display:true, text:'중량(g)'} } } }
+    });
+
+    // 02. 지역별 품종 분포 (Stacked Bar)
+    new Chart(document.getElementById('regionChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ dest_labels|tojson }},
+            datasets: [
+                {% for breed in breed_names %}
+                {
+                    label: '{{ breed }}',
+                    data: {{ dest_matrix[breed]|tojson }},
+                    backgroundColor: colors[{{ loop.index0 % 6 }}]
+                },
+                {% endfor %}
+            ]
+        },
+        options: { maintainAspectRatio: false, scales: { x: { stacked: true, ...commonAxes }, y: { stacked: true, ...commonAxes } } }
+    });
+
+    // 03. 온습도별 불합격 리스크 분석 (Scatter)
+    new Chart(document.getElementById('envFailChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: '불합격(Fail) 발생 지점',
+                data: {{ env_fail_data|tojson }},
+                backgroundColor: 'rgba(244, 63, 94, 0.7)',
+                borderColor: '#f43f5e',
+                borderWidth: 1
+            }]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            scales: { 
+                x: { ...commonAxes, title: { display: true, text: '온도 (°C)' } }, 
+                y: { ...commonAxes, title: { display: true, text: '습도 (%)' } } 
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        boxWidth: 0, // 박스 제거
+                        color: '#f43f5e', // 텍스트 컬러 빨간색
+                        font: { size: 14, weight: 'bold' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const d = context.raw;
+                            return [
+                                `온도: ${d.x}°C, 습도: ${d.y}%`,
+                                `농장: ${d.farm} 농장`,
+                                `중량: ${d.weight}g`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 04. 농장별 합격률 현황 (Bar)
+    new Chart(document.getElementById('farmChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ farm_labels|tojson }},
+            datasets: [{ label: '최종 합격률(%)', data: {{ farm_pass_rates|tojson }}, backgroundColor: '#10b981', borderRadius: 4 }]
+        },
+        options: { maintainAspectRatio: false, scales: { x: commonAxes, y: { ...commonAxes, max: 100 } } }
+    });
+</script>
+{% endblock %}
